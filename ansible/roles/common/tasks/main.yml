@@ -1,0 +1,8 @@
+- name: set timezone to Asia/Tokyo
+  timezone:
+    name: Asia/Tokyo
+
+- name: Install Necessary Packages
+  yum:
+    name:
+      - git
