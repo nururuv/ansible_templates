@@ -1,3 +1,3 @@
 vagrant/.vagrant
-_work/
+_work/*
 !.gitkeep
