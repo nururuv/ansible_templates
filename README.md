@@ -12,3 +12,10 @@ vagrant-vbguest のインストール
 ```
 vagrant plugin install vagrant-vbguest
 ```
+
+仮想環境構築
+
+```
+cd vagrant
+vagrant up
+```
