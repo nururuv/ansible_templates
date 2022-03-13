@@ -1,0 +1,35 @@
+- name: Create Directory
+  file:
+    path: "{{ path.wordpress }}"
+    state: directory
+    mode: "755"
+    owner: root
+    group: root
+
+- name: Check Whether Wordpress Is Already Installed
+  stat:
+    path: "{{ path.wordpress }}/wordpress/index.php"
+  register: wordpress_installed
+
+- name: Download wordpress-5.9
+  block:
+    - name: Download Zip File
+      get_url:
+        url: https://ja.wordpress.org/wordpress-5.9-ja.tar.gz
+        dest: "{{ path.wordpress }}"
+        timeout: 300
+        owner: apache
+        group: apache
+
+    - name: Unarchive Zip File
+      unarchive:
+        src: "{{ path.wordpress }}/wordpress-5.9-ja.tar.gz"
+        dest: "{{ path.wordpress }}"
+        owner: apache
+        group: apache
+
+    - name: Remove Zip File
+      file:
+        path: "{{ path.wordpress }}/wordpress-5.9-ja.tar.gz"
+        state: absent
+  when: not  wordpress_installed.stat.exists

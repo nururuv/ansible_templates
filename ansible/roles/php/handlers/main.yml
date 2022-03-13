@@ -1,0 +1,13 @@
+- name: Restart httpd And Enable php74-php-fpm
+  block:
+    - name: Restart httpd
+      systemd:
+        name: httpd
+        enabled: yes
+        state: restarted
+
+    - name: Enable php74-php-fpm
+      systemd:
+        name: php74-php-fpm
+        enabled: yes
+        state: restarted

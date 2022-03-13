@@ -1,0 +1,10 @@
+path:
+  wordpress: /var/www/html
+
+local_user: vagrant
+local_group: vagrant
+
+mysql:
+  user_name: user
+  user_password: Mysql@9999
+  root_password: Mysql@9999

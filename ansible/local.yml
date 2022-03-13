@@ -4,3 +4,6 @@
   roles:
     - common
     - httpd
+    - mysql
+    - php
+    - wordpress

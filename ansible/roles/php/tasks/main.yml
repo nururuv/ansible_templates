@@ -1,0 +1,30 @@
+- name: Check Whether PHP Is Already Installed
+  stat: path=/usr/bin/php
+  register: result
+
+- name: Install epel And remi
+  block:
+    - name: Install epel
+      shell: "amazon-linux-extras install epel"
+
+    - name: Install remi
+      yum:
+        name: http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+  when: not result.stat.exists
+
+- name: Install PHP7.4 And Modules
+  yum:
+    name:
+      - php74
+      - php74-php
+      - php74-php-fpm
+      - php74-php-mysqlnd
+      - php74-php-dom
+      - php74-php-xml
+  notify: Restart httpd And Enable php74-php-fpm
+
+- name: Create symbolic link
+  file:
+    src: /usr/bin/php74
+    dest: /usr/bin/php
+    state: link

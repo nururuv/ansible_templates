@@ -1,0 +1,89 @@
+- name: Remove MariaDB
+  yum:
+    name: mariadb-libs
+    state: removed
+
+# TODO: MYSQL側のバグのため一時的に以下ブロック内の処理追加。バグがfixされたらblockごと消す
+# https://bugs.mysql.com/bug.php?id=106188
+# https://forums.cpanel.net/threads/mysql-upgrade-process-failed-the-gpg-keys-listed-for-the-mysql-8-0-community-server-repository-are-already-installed-but-they-are-not-correct-for.697213/
+- block:
+    - name: Check Repository
+      shell: yum repolist mysql80-community -v | grep -o enabled
+      register: exist_repo
+      failed_when: no
+
+    - name: Install GPG Key
+      shell: rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+      when: exist_repo.stdout != "enabled"
+
+- name: Add Repository
+  yum:
+    name: https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+
+- name: Install Packages
+  yum:
+    name:
+      - mysql-community-server
+      - mysql-community-devel
+    enablerepo: mysql80-community
+  notify: Enable MySQL
+
+- name: Copy my.cnf
+  copy:
+    src: my.cnf
+    dest: /etc/my.cnf
+    mode: "644"
+
+- name: Restart MySQL
+  systemd:
+    name: mysqld
+    state: restarted
+
+- name: Install MySQL-Python Module
+  yum:
+    name: MySQL-python
+
+- name: Check Initialize
+  shell: mysql -uroot -p{{ mysql.root_password}}
+  register: mysql_login_result
+  failed_when: no
+
+- block:
+    # FIXME: MYSQL初期パスワード設定方法改善
+    - name: Get Temporary Password
+      shell: cat /var/log/mysqld.log | grep "temporary password" | awk '{print $13}'
+      register: mysql_default_password
+
+    - name: Debug Mysql Initial Password
+      debug:
+        msg: "{{ mysql_default_password.stdout }}"
+
+    - name: Change Mysql Initial Password
+      shell: mysql -uroot -p"{{ mysql_default_password.stdout }}" --connect-expired-password -e"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password  BY '{{ mysql.root_password }}'";
+
+    - name: Removes Anonymous User
+      mysql_user:
+        name: ""
+        host: localhost
+        state: absent
+        login_user: root
+        login_password: "{{ mysql.root_password }}"
+  when: mysql_login_result.rc != 0
+
+- name: Create Default User
+  mysql_user:
+    name: "{{ mysql.user_name }}"
+    password: "{{ mysql.user_password }}"
+    host: localhost
+    priv: "*.*:ALL"
+    login_user: root
+    login_password: "{{ mysql.root_password }}"
+
+- name: Create DB default
+  mysql_db:
+    name: default
+    state: present
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
+    login_user: "{{ mysql.user_name }}"
+    login_password: "{{ mysql.user_password }}"

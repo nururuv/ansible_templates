@@ -1,3 +1,12 @@
 - name: Install Apache
   yum:
     name: httpd
+
+- name: Edit Httpd.conf
+  copy:
+    src: "httpd.conf"
+    dest: /etc/httpd/conf/httpd.conf
+    owner: "{{ local_user }}"
+    group: "{{ local_group }}"
+  notify:
+    - Enable httpd
