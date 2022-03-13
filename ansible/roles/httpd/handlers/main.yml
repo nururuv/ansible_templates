@@ -1,0 +1,5 @@
+- name: Enable httpd
+  systemd:
+    name: httpd
+    enabled: yes
+    state: restarted
