@@ -15,12 +15,29 @@
 - name: Install PHP7.4 And Modules
   yum:
     name:
+      - jasper-libs
+      - lcms2
       - php74
       - php74-php
       - php74-php-fpm
       - php74-php-mysqlnd
       - php74-php-dom
       - php74-php-xml
+  notify:
+    - Restart httpd
+    - Enable php74-php-fpm
+
+- name: Install LibRaw rpm
+  yum:
+    name: http://mirror.centos.org/centos/7/os/x86_64/Packages/LibRaw-0.19.4-1.el7.x86_64.rpm
+  when: not result.stat.exists
+
+- name: Install PHP Modules 2
+  yum:
+    name:
+      - php74-php-mbstring
+      - php74-php-pecl-zip
+      - php74-php-pecl-imagick
   notify:
     - Restart httpd
     - Enable php74-php-fpm
