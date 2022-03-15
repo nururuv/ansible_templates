@@ -23,6 +23,14 @@
       - php74-php-xml
   notify: Restart httpd And Enable php74-php-fpm
 
+- name: Copy php.ini
+  copy:
+    src: php.ini
+    dest: /etc/opt/remi/php74/php.ini
+    mode: "644"
+  notify:
+    - Restart httpd And Enable php74-php-fpm
+
 - name: Create symbolic link
   file:
     src: /usr/bin/php74
