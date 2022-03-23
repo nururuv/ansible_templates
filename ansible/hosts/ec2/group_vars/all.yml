@@ -1,0 +1,5 @@
+path:
+  wordpress: /var/www/html
+
+local_user: ec2-user
+local_group: ec2-user
