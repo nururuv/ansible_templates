@@ -38,6 +38,7 @@
       - php74-php-mbstring
       - php74-php-pecl-zip
       - php74-php-pecl-imagick
+      - php74-php-intl
   notify:
     - Restart httpd
     - Enable php74-php-fpm
